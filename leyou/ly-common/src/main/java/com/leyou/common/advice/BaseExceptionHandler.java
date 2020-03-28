@@ -15,4 +15,5 @@ public class BaseExceptionHandler {
                 .status(e.getStatus()) //获取的状态码
                 .body(new ExceptionResult(e));
     }
+
 }
