@@ -3,6 +3,8 @@ package com.leyou.common.utils;
 /*import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exceptions.LyException;*/
 
+import com.leyou.common.enums.ExceptionEnum;
+import com.leyou.common.exception.LyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
@@ -20,8 +22,7 @@ public class BeanHelper {
             return t;
         } catch (Exception e) {
             log.error("【数据转换】数据转换出错，目标对象{}构造函数异常", target.getName(), e);
-            //throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
-            return null;
+            throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
         }
     }
 
@@ -30,8 +31,7 @@ public class BeanHelper {
             return sourceList.stream().map(s -> copyProperties(s, target)).collect(Collectors.toList());
         } catch (Exception e) {
             log.error("【数据转换】数据转换出错，目标对象{}构造函数异常", target.getName(), e);
-            //throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
-            return null;
+            throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
         }
 
     }
@@ -41,8 +41,7 @@ public class BeanHelper {
             return sourceList.stream().map(s -> copyProperties(s, target)).collect(Collectors.toSet());
         } catch (Exception e) {
             log.error("【数据转换】数据转换出错，目标对象{}构造函数异常", target.getName(), e);
-            //throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
-            return null;
+            throw new LyException(ExceptionEnum.DATA_TRANSFER_ERROR);
         }
     }
 }

@@ -5,13 +5,32 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      # 添加cors的解决方案
+      globalcors:
+        add-to-simple-url-handler-mapping: true  # 预检请求; 特殊请求
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://manage.leyou.com"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 360000
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - OPTIONS
+              - HEAD
+      # 路由配置
       routes:
         - id: item-service        # id，可以随便定义
           uri: lb://item-service  # 后面的是微服务的id，不能乱写
           predicates:
             - Path=/api/item/**   # 路由断言映射
           filters:
-            - StripPrefix=1       # 代表去除 api的前缀
+            - StripPrefix=2       # 代表去除 api的前缀
 eureka:
   client:
     service-url:
