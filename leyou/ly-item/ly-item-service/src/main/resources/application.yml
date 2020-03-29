@@ -4,7 +4,7 @@ spring:
   application:
     name: item-service
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.13.111:3306/leyou?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: passw0rd
@@ -12,6 +12,7 @@ mybatis:
     type-aliases-package: com.leyou.item.entity
     configuration:
       map-underscore-to-camel-case: true
+    mapper-locations: mapper/*.xml
 eureka:
   client:
     service-url:
