@@ -16,3 +16,14 @@ eureka:
   instance:
     prefer-ip-address: true
     ip-address: 127.0.0.1
+#添加上传的自定义的配置文件，包括上传id和key等信息
+ly:
+  oss:
+    accessKeyId: LTAI4FdkwsDcqJKM9PiAudW4
+    accessKeySecret: uS8OrKYZ5XJnXBCSeXltcowrajzXrC
+    #host: http://ly-upload-heihei.oss-cn-shenzhen.aliyuncs.com # 访问oss的域名：在oss控制台可以拷贝
+    host: http://image.leyou.com
+    endpoint: oss-cn-shenzhen.aliyuncs.com # 你的服务的端点，不一定跟我一样
+    dir: "" # 保存到bucket的某个子目录
+    expireTime: 20 # 过期时间，单位是S
+    maxFileSize: 5242880 #文件大小限制，这里是5M

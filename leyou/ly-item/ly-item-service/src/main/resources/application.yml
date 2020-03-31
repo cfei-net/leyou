@@ -13,6 +13,9 @@ mybatis:
     configuration:
       map-underscore-to-camel-case: true
     mapper-locations: mapper/*.xml
+mapper:
+  wrap-keyword: "`{0}`"
+
 eureka:
   client:
     service-url:
@@ -23,3 +26,8 @@ eureka:
   instance:
     prefer-ip-address: true
     ip-address: 127.0.0.1
+logging:
+  level:
+    root: info
+    com.leyou: debug
+
