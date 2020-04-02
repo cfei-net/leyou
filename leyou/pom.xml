@@ -32,6 +32,7 @@
         <pageHelper.starter.version>1.2.10</pageHelper.starter.version>
         <mysql.version>8.0.15</mysql.version>
         <leyou.last.version>1.0-SNAPSHOT</leyou.last.version>
+        <mapper.version>1.1.5</mapper.version>
     </properties>
 
     <dependencyManagement>

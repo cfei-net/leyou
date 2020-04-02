@@ -51,4 +51,16 @@ public class BrandController {
         brandService.saveBrand(brandDTO, cids);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+
+    /**
+     * 根据分类的id查询品牌信息
+     * @param categoryId    分类id
+     * @return              品牌集合
+     */
+    @GetMapping("/of/category")
+    public ResponseEntity<List<BrandDTO>> queryBrandByCategoryId(@RequestParam("id") Long categoryId){
+        List<BrandDTO> brandDTOList = brandService.queryBrandByCategoryId(categoryId);
+        return ResponseEntity.ok(brandDTOList);
+    }
 }

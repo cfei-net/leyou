@@ -102,4 +102,33 @@ public class BrandService {
         }
 
     }
+
+    /**
+     * 根据品牌id查询品牌
+     * @param brandId
+     * @return
+     */
+    public BrandDTO queryBrandById(Long brandId) {
+        Brand brand = brandMapper.selectByPrimaryKey(brandId);
+        if(brand == null){
+            throw new LyException(ExceptionEnum.BRAND_NOT_FOUND);
+        }
+        return BeanHelper.copyProperties(brand, BrandDTO.class);
+    }
+
+    /**
+     * 根据分类id查询品牌
+     * @param categoryId
+     * @return
+     */
+    public List<BrandDTO> queryBrandByCategoryId(Long categoryId) {
+        // 根据分类id查询品牌
+        List<Brand> brandList = brandMapper.queryBrandByCategoryId(categoryId);
+        // 判空
+        if(CollectionUtils.isEmpty(brandList)){
+            throw new LyException(ExceptionEnum.BRAND_NOT_FOUND);
+        }
+        // 返回
+        return BeanHelper.copyWithCollection(brandList, BrandDTO.class);
+    }
 }

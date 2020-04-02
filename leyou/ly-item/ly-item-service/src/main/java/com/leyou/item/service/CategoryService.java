@@ -46,4 +46,19 @@ public class CategoryService {
         List<CategoryDTO> cList = BeanHelper.copyWithCollection(categoryList, CategoryDTO.class);
         return cList;
     }
+
+    /**
+     * 根据分类id集合去批量查询分类信息
+     * @param categoryIds   分类的ID集合
+     * @return              返回分类的列表
+     *
+     * 扩展通用mapper
+     */
+    public List<CategoryDTO> queryCategoryByIds(List<Long> categoryIds) {
+        List<Category> categoryList = categoryMapper.selectByIdList(categoryIds);
+        if (CollectionUtils.isEmpty(categoryList)){
+            throw new LyException(ExceptionEnum.CATEGORY_NOT_FOUND);
+        }
+        return BeanHelper.copyWithCollection(categoryList, CategoryDTO.class);
+    }
 }
