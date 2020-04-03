@@ -2,13 +2,17 @@ package com.leyou.item.web;
 
 import com.leyou.common.vo.PageResult;
 import com.leyou.item.dto.BrandDTO;
+import com.leyou.item.dto.SkuDTO;
 import com.leyou.item.dto.SpuDTO;
+import com.leyou.item.dto.SpuDetailDTO;
 import com.leyou.item.service.GoodsService;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class GoodsController {
@@ -38,4 +42,64 @@ public class GoodsController {
         return ResponseEntity.ok(pageResult);
     }
 
+    /**
+     * 保存商品数据
+     * @param spuDTO       接收页面传入的数据： 包括商品、商品详情、包括sku列表
+     * @return             没有返回值
+     */
+    @PostMapping("/goods")
+    public ResponseEntity<Void> saveGoods(@RequestBody SpuDTO spuDTO){
+        goodsService.saveGoods(spuDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 更新商品的上下架
+     * @param spuId     spu的id
+     * @param saleable  是否上下架
+     * @return          没有返回值
+     */
+    @PutMapping("/spu/saleable")
+    public ResponseEntity<Void> updateGoodsSaleable(
+            @RequestParam("id") Long spuId,
+            @RequestParam(value = "saleable",required = true)Boolean saleable
+            ){
+        // 更新
+        goodsService.updateGoodsSaleable(spuId, saleable);
+        // 返回
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * 根据id查询商品详情
+     * @param spuId     spu的id
+     * @return          spuDetail
+     */
+    @GetMapping("/spu/detail")
+    public ResponseEntity<SpuDetailDTO> querySpuDetailById(@RequestParam("id") Long spuId){
+        SpuDetailDTO spuDetailDTO = goodsService.querySpuDetailById(spuId);
+        return ResponseEntity.ok(spuDetailDTO);
+    }
+
+    /**
+     * 根据spu的id查询sku集合
+     * @param spuId     spu的id
+     * @return          sku的：列表
+     */
+    @GetMapping("/sku/of/spu")
+    public ResponseEntity<List<SkuDTO>> querySkuListBySpuId(@RequestParam("id") Long spuId){
+        List<SkuDTO> skuList = goodsService.querySkuListBySpuId(spuId);
+        return ResponseEntity.ok(skuList);
+    }
+
+    /**
+     * 更新商品数据
+     * @param spuDTO    spu的dto接收页面传入的参数
+     * @return          没有返回值
+     */
+    @PutMapping("/goods")
+    public ResponseEntity<Void> updateGoods(@RequestBody SpuDTO spuDTO){
+        goodsService.updateGoods(spuDTO);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
