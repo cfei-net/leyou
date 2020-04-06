@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ly-item</artifactId>
+        <groupId>com.leyou</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ly-item-client</artifactId>
+
+    <dependencies>
+        <!-- 这个 模块放的是 item模块的所有的feign的接口 ，专用用来给别人调用的-->
+        <dependency>
+            <groupId>com.leyou</groupId>
+            <artifactId>ly-item-dto</artifactId>
+            <version>${leyou.last.version}</version>
+        </dependency>
+        <!--web-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <!--这个工程最后相当于一个jar包，不要导入feign的启动器，只需要核心的feign的依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+        </dependency>
+        <!--导入common包-->
+        <dependency>
+            <groupId>com.leyou</groupId>
+            <artifactId>ly-common</artifactId>
+            <version>${leyou.last.version}</version>
+        </dependency>
+    </dependencies>
+
+
+</project>

@@ -35,4 +35,15 @@ public class CategoryController {
         List<CategoryDTO> categoryDTOList = categoryService.queryCategoryByParentId(pid);
         return ResponseEntity.ok(categoryDTOList);
     }
+
+    /**
+     * 通过分类id的集合查询分类的信息
+     * @param ids       分类的id集合
+     * @return          分类的DTO
+     */
+    @GetMapping("/category/list")
+    public ResponseEntity<List<CategoryDTO>> queryCategoryByIds(@RequestParam("ids") List<Long> ids){
+        List<CategoryDTO> categoryDTOList = categoryService.queryCategoryByIds(ids);
+        return ResponseEntity.ok(categoryDTOList);
+    }
 }

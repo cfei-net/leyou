@@ -19,6 +19,7 @@
     <modules>
         <module>ly-item-dto</module>
         <module>ly-item-service</module>
+        <module>ly-item-client</module>
     </modules>
 
 
