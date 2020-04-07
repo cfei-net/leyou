@@ -1,12 +1,26 @@
 package com.leyou.search.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.leyou.common.enums.ExceptionEnum;
+import com.leyou.common.exception.LyException;
+import com.leyou.common.utils.BeanHelper;
 import com.leyou.common.utils.JsonUtils;
+import com.leyou.common.vo.PageResult;
 import com.leyou.item.client.ItemClient;
 import com.leyou.item.dto.*;
 import com.leyou.search.bo.Goods;
+import com.leyou.search.dto.GoodsDTO;
+import com.leyou.search.dto.SearchRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,6 +31,9 @@ public class SearchService {
 
     @Autowired
     private ItemClient itemClient;
+
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate;
 
     /**
      * 创建Goods对象
@@ -141,5 +158,46 @@ public class SearchService {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    /**
+     * 商品搜索
+     * @param searchRequest     搜索条件
+     * @return                  分页后的商品数据
+     */
+    public PageResult<GoodsDTO> search(SearchRequest searchRequest) {
+        // 如果没有查询条件，我们抛异常
+        String key = searchRequest.getKey();
+        if(StringUtils.isBlank(key)){
+            throw new LyException(ExceptionEnum.INVALID_PARAM_ERROR);
+        }
+
+        // 原生的查询构建器
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        // ====================================================================================================
+        // 1、控制字段的数量
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id","subTitle","skus"}, null));
+
+        // 2、拼接搜索条件:  分词查询
+        queryBuilder.withQuery(QueryBuilders.matchQuery("all", key).operator(Operator.AND));
+
+        // 3、分页条件设置
+        Integer page = searchRequest.getPage() - 1;  // springdata的起始页是从0开始，所以减一
+        Integer size = searchRequest.getSize();      // 页大小
+        queryBuilder.withPageable(PageRequest.of(page, size));
+        // ====================================================================================================
+        // 执行查询操作
+        AggregatedPage<Goods> goodsPage = elasticsearchTemplate.queryForPage(queryBuilder.build(), Goods.class);
+
+        // 获取结果
+        long totalElements = goodsPage.getTotalElements(); // 总记录数
+        int totalPages = goodsPage.getTotalPages();     // 总页数
+        List<Goods> goodsList = goodsPage.getContent(); //当前页数据
+
+        // 返回数据
+        return new PageResult<>(
+                totalElements,
+                totalPages,
+                BeanHelper.copyWithCollection(goodsList, GoodsDTO.class));
     }
 }

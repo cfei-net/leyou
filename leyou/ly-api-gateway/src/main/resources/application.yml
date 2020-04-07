@@ -12,6 +12,7 @@ spring:
           '[/**]':
             allowedOrigins:
               - "http://manage.leyou.com"
+              - "http://www.leyou.com"
             allowedHeaders:
               - "*"
             allowCredentials: true
