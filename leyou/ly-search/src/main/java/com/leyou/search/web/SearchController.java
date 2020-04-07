@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 public class SearchController {
 
@@ -26,4 +29,16 @@ public class SearchController {
         PageResult<GoodsDTO> pageResult = searchService.search(searchRequest);
         return ResponseEntity.ok(pageResult);
     }
+
+    /**
+     * 根据条件查询过滤项
+     * @param searchRequest     查询条件
+     * @return                  过滤项
+     */
+    @PostMapping("/filter")
+    public ResponseEntity<Map<String, List<?>>> filter(@RequestBody SearchRequest searchRequest){
+        Map<String, List<?>> filterMap = searchService.filter(searchRequest);
+        return ResponseEntity.ok(filterMap);
+    }
+
 }

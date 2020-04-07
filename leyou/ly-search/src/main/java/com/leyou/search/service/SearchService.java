@@ -13,7 +13,14 @@ import com.leyou.search.dto.GoodsDTO;
 import com.leyou.search.dto.SearchRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.similarity.ScriptedSimilarity;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.DoubleTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -179,7 +186,7 @@ public class SearchService {
         queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id","subTitle","skus"}, null));
 
         // 2、拼接搜索条件:  分词查询
-        queryBuilder.withQuery(QueryBuilders.matchQuery("all", key).operator(Operator.AND));
+        queryBuilder.withQuery(builderSearchKey(searchRequest));
 
         // 3、分页条件设置
         Integer page = searchRequest.getPage() - 1;  // springdata的起始页是从0开始，所以减一
@@ -199,5 +206,105 @@ public class SearchService {
                 totalElements,
                 totalPages,
                 BeanHelper.copyWithCollection(goodsList, GoodsDTO.class));
+    }
+
+    /**
+     * 加载所有的过滤项
+     *      1）分类
+     *      2）品牌
+     *      3）过滤参数
+     *
+     * @param searchRequest     查询条件
+     * @return                  所有的过滤项
+     */
+    public Map<String, List<?>> filter(SearchRequest searchRequest) {
+        // 如果没有查询条件，我们抛异常
+        String key = searchRequest.getKey();
+        if(StringUtils.isBlank(key)){
+            throw new LyException(ExceptionEnum.INVALID_PARAM_ERROR);
+        }
+
+        // 实例化一个map来装过滤项
+        Map<String, List<?>> filterMap = new LinkedHashMap<>();
+        //=================================================================
+        // 原生的查询构建器
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        // ====================================================================================================
+        // 1、控制字段的数量
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{""}, null));
+        // 2、拼接搜索条件:  分词查询
+        queryBuilder.withQuery(builderSearchKey(searchRequest));
+        // 3、分页条件设置
+        queryBuilder.withPageable(PageRequest.of(0, 1));
+
+        // 4、添加聚合条件
+        // 4.1 聚合分类
+        String categoryAgg = "categoryAgg";
+        queryBuilder.addAggregation(AggregationBuilders.terms(categoryAgg).field("categoryId").size(1000));
+        // 4.2 聚合品牌
+        String brandAgg = "brandAgg";
+        queryBuilder.addAggregation(AggregationBuilders.terms(brandAgg).field("brandId").size(1000));
+        // ====================================================================================================
+        // 执行查询操作
+        AggregatedPage<Goods> goodsPage = elasticsearchTemplate.queryForPage(queryBuilder.build(), Goods.class);
+
+        //=====================================================
+        // 获取结果数据
+        Aggregations agg = goodsPage.getAggregations();
+        // 获取分类
+        Terms categoryTerm = agg.get(categoryAgg);
+        // 把分类聚合结果放入filterMap
+        handlerCategoryFilter(categoryTerm, filterMap);
+        // 获取品牌
+        Terms brandTerm = agg.get(brandAgg);
+        handlerBrandFilter(brandTerm, filterMap);
+
+        // 返回数据
+        return filterMap;
+    }
+
+
+    /**
+     * 把分类的聚合结果放入filterMap中
+     * @param categoryTerm
+     * @param filterMap
+     */
+    private void handlerCategoryFilter(Terms categoryTerm, Map<String, List<?>> filterMap) {
+        // 得到聚合的所有的桶
+        List<? extends Terms.Bucket> buckets = categoryTerm.getBuckets();
+        // 收集桶中的所有的key，他们其实就是分类的id
+        List<Long> categoryIds = buckets.stream().map(Terms.Bucket::getKeyAsNumber).map(Number::longValue).collect(Collectors.toList());
+        // 去数据库中查询出分类的信息
+        List<CategoryDTO> categoryDTOList = itemClient.queryCategoryByIds(categoryIds);
+        // 存入filterMap
+        filterMap.put("分类", categoryDTOList);
+    }
+
+
+    /**
+     * 把品牌的聚合结果放入filterMap中
+     * @param brandTerm
+     * @param filterMap
+     */
+    private void handlerBrandFilter(Terms brandTerm, Map<String, List<?>> filterMap) {
+        // 收集桶中所有的品牌的id
+        List<Long> brandIds = brandTerm.getBuckets().stream()
+                .map(Terms.Bucket::getKeyAsNumber)
+                .map(Number::longValue)
+                .collect(Collectors.toList());
+        // 根据品牌id集合查询品牌信息
+        List<BrandDTO> brandDTOList = itemClient.queryBrandByIds(brandIds);
+        // 放入filtermap
+        filterMap.put("品牌",brandDTOList);
+    }
+
+
+    /**
+     * 抽取查询条件的拼接
+     * @param searchRequest
+     * @return
+     */
+    private QueryBuilder builderSearchKey(SearchRequest searchRequest){
+        return QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND);
     }
 }

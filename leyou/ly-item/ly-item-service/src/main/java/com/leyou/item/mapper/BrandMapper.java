@@ -1,5 +1,6 @@
 package com.leyou.item.mapper;
 
+import com.leyou.common.mapper.BaseMapper;
 import com.leyou.item.entity.Brand;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -7,7 +8,7 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-public interface BrandMapper extends Mapper<Brand> {
+public interface BrandMapper extends BaseMapper<Brand> {
     /**
      * 插入分类和品牌的中间表
      * @param bId   品牌id
