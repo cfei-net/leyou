@@ -12,6 +12,7 @@ import com.leyou.search.bo.Goods;
 import com.leyou.search.dto.GoodsDTO;
 import com.leyou.search.dto.SearchRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -19,6 +20,7 @@ import org.elasticsearch.index.similarity.ScriptedSimilarity;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.range.Range;
 import org.elasticsearch.search.aggregations.bucket.terms.DoubleTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -254,13 +257,56 @@ public class SearchService {
         // 获取分类
         Terms categoryTerm = agg.get(categoryAgg);
         // 把分类聚合结果放入filterMap
-        handlerCategoryFilter(categoryTerm, filterMap);
+        List<Long> categoryIds = handlerCategoryFilter(categoryTerm, filterMap);
         // 获取品牌
         Terms brandTerm = agg.get(brandAgg);
         handlerBrandFilter(brandTerm, filterMap);
 
+        // ======================================================
+        // 添加过滤参数
+        // 1、获取分类的id，才能找到聚合用的key：  specs.cpu品牌； 改造了分类聚合的方法
+        // 只有是只剩下一个分类的时候，我们再去聚合
+        if(categoryIds!=null && categoryIds.size() == 1){
+            addSpecParamFilter(categoryIds.get(0), builderSearchKey(searchRequest), filterMap);
+        }
         // 返回数据
         return filterMap;
+    }
+
+    /**
+     * 查询规格过滤参数
+     * @param categoryId           分类的id
+     * @param builderSearchKey      聚合条件
+     * @param filterMap             我们把所有的规格参数值放入map
+     */
+    private void addSpecParamFilter(Long categoryId, QueryBuilder builderSearchKey, Map<String, List<?>> filterMap) {
+        // 2、通过分类的id去查询规格过滤参数：
+        List<SpecParamDTO> specParamDTOS = itemClient.querySpecParam(null, categoryId, true);
+        // 3、我们创建es的原生查询构建器
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{""}, null));
+        queryBuilder.withQuery(builderSearchKey);
+        queryBuilder.withPageable(PageRequest.of(0, 1));
+        // 4、拼接聚合的fidld的名称
+        for (SpecParamDTO specParm : specParamDTOS) {
+            String aggName = specParm.getName();
+            String fieldName = "specs."+aggName;
+            queryBuilder.addAggregation(AggregationBuilders.terms(aggName).field(fieldName).size(1000));
+        }
+        // 5、发起聚合查询
+        AggregatedPage<Goods> goodsPage = elasticsearchTemplate.queryForPage(queryBuilder.build(), Goods.class);
+        // 6、迭代获取结果：获取桶中的数据
+        Aggregations aggregations = goodsPage.getAggregations();
+        // 7、迭代获取桶中的内容
+        for (SpecParamDTO specParm : specParamDTOS) {
+            String aggName = specParm.getName();
+            Terms terms = aggregations.get(aggName);
+            List<String> specList = terms.getBuckets().stream()
+                    .map(Terms.Bucket::getKeyAsString)
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toList());
+            filterMap.put(aggName, specList);
+        }
     }
 
 
@@ -268,16 +314,21 @@ public class SearchService {
      * 把分类的聚合结果放入filterMap中
      * @param categoryTerm
      * @param filterMap
+     * @return 分类的id集合，用于查询规格过滤参数名称
      */
-    private void handlerCategoryFilter(Terms categoryTerm, Map<String, List<?>> filterMap) {
+    private List<Long> handlerCategoryFilter(Terms categoryTerm, Map<String, List<?>> filterMap) {
         // 得到聚合的所有的桶
         List<? extends Terms.Bucket> buckets = categoryTerm.getBuckets();
         // 收集桶中的所有的key，他们其实就是分类的id
         List<Long> categoryIds = buckets.stream().map(Terms.Bucket::getKeyAsNumber).map(Number::longValue).collect(Collectors.toList());
         // 去数据库中查询出分类的信息
-        List<CategoryDTO> categoryDTOList = itemClient.queryCategoryByIds(categoryIds);
+        List<CategoryDTO> categoryDTOList = null;
+        if(!CollectionUtils.isEmpty(categoryIds)){
+            categoryDTOList = itemClient.queryCategoryByIds(categoryIds);
+        }
         // 存入filterMap
         filterMap.put("分类", categoryDTOList);
+        return categoryIds;
     }
 
 
@@ -293,7 +344,10 @@ public class SearchService {
                 .map(Number::longValue)
                 .collect(Collectors.toList());
         // 根据品牌id集合查询品牌信息
-        List<BrandDTO> brandDTOList = itemClient.queryBrandByIds(brandIds);
+        List<BrandDTO> brandDTOList = null;
+        if(!CollectionUtils.isEmpty(brandIds)) {
+            brandDTOList = itemClient.queryBrandByIds(brandIds);
+        }
         // 放入filtermap
         filterMap.put("品牌",brandDTOList);
     }
@@ -305,6 +359,27 @@ public class SearchService {
      * @return
      */
     private QueryBuilder builderSearchKey(SearchRequest searchRequest){
-        return QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND);
+        // 组合条件查询
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        // 1、查询条件拼接
+        boolQueryBuilder.must(QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND));
+        // 2、拼接过滤参数
+        Map<String, Object> filters = searchRequest.getFilters();
+        if(!CollectionUtils.isEmpty(filters)) {
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                String fieldName = "";
+                if ("分类".equals(key)) {
+                    fieldName = "categoryId";
+                } else if ("品牌".equals(key)) {
+                    fieldName = "brandId";
+                } else {
+                    fieldName = "specs." + key;
+                }
+                boolQueryBuilder.filter(QueryBuilders.termsQuery(fieldName, value));
+            }
+        }
+        return boolQueryBuilder;
     }
 }
