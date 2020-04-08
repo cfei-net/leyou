@@ -1,0 +1,7 @@
+server:
+  port: 8084
+spring:
+  thymeleaf:
+    cache: false
+  application:
+    name: page-service
