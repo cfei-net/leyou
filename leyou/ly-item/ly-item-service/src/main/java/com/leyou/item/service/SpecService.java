@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class SpecService {
@@ -66,5 +70,66 @@ public class SpecService {
         }
         // 返回
         return BeanHelper.copyWithCollection(specParams, SpecParamDTO.class);
+    }
+
+    /**
+     * 根据分类id查询规格组和组内参数
+     * @param categoryId
+     * @return
+     */
+    public List<SpecGroupDTO> querySpecGroupAndParamsByCategoryId(Long categoryId) {
+        // 1、查询规格组
+        List<SpecGroupDTO> groupDTOList = querySpecGroupByCategoryId(categoryId);
+        // 2、查询组内参数
+        // 第三种方式： 可以优化里面的第二重for循环
+        List<SpecParamDTO> params = querySpecParam(null, categoryId, null);
+        // 把所有规格参数数据转成map
+        Map<Long, List<SpecParamDTO>> paramMap = params.stream().collect(Collectors.groupingBy(SpecParamDTO::getGroupId));
+        // 把规格参数放入规格组中
+        for (SpecGroupDTO specGroupDTO : groupDTOList) {
+            specGroupDTO.setParams(paramMap.get(specGroupDTO.getId()));
+        }
+
+
+        /*Map<Long, List<SpecParamDTO>> map = new HashMap<>();
+        for (SpecParamDTO param : params) {
+            Long groupId = param.getGroupId();
+            if(CollectionUtils.isEmpty(map.get(groupId))){
+                ArrayList<SpecParamDTO> list = new ArrayList<SpecParamDTO>();
+                map.put(groupId, list);
+            }
+            map.get(groupId).add(param);
+        }
+        for (SpecGroupDTO specGroupDTO : groupDTOList) {
+            specGroupDTO.setParams(map.get(specGroupDTO.getId()));
+        }*/
+
+
+        /*
+        双重for循环：效率不高
+        // 第二种方式：根据分类id 一次性查询出所有的规格参数，然后在代码中再去设置到组内
+        List<SpecParamDTO> params = querySpecParam(null, categoryId, null);
+        for (SpecGroupDTO group : groupDTOList) {
+            // 判断如果组内的规格参数集合为空，实例化一个集合给他
+            if(CollectionUtils.isEmpty(group.getParams())){
+                group.setParams(new ArrayList<SpecParamDTO>());
+            }
+            for (SpecParamDTO param : params) {
+                // 如果规格组id和参数的组id一致
+                if(param.getGroupId() == group.getId()){
+                    group.getParams().add(param);
+                }
+            }
+        }*/
+
+
+        /*
+        第一种方式： 问题在for循环中操作数据库，性能不好
+        for (SpecGroupDTO specGroupDTO : groupDTOList) {
+            List<SpecParamDTO> params = querySpecParam(specGroupDTO.getId(), null, null);
+            specGroupDTO.setParams(params);
+        }*/
+        // 3、返回
+        return groupDTOList;
     }
 }

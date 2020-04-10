@@ -256,4 +256,25 @@ public class GoodsService {
             throw new LyException(ExceptionEnum.INSERT_OPERATION_FAIL);
         }
     }
+
+    /**
+     * 根据spu的id去查询spu
+     * @param id
+     * @return
+     */
+    public SpuDTO querySpuById(Long id) {
+        // 查询商品
+        Spu spu = spuMapper.selectByPrimaryKey(id);
+        if(spu==null){
+            throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
+        }
+        // 换成dto
+        SpuDTO spuDTO = BeanHelper.copyProperties(spu, SpuDTO.class);
+        // 查询详情
+        spuDTO.setSpuDetail(querySpuDetailById(id));
+        // 查sku集合
+        spuDTO.setSkus(querySkuListBySpuId(id));
+        // 返回
+        return spuDTO;
+    }
 }

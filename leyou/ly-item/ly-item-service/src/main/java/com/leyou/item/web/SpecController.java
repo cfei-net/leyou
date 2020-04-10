@@ -47,4 +47,15 @@ public class SpecController {
         List<SpecParamDTO> specParamList = specService.querySpecParam(gid, cid, searching);
         return ResponseEntity.ok(specParamList);
     }
+
+    /**
+     * 根据分类id查询规格组和组内参数
+     * @param categoryId    分类id
+     * @return              规格组和组内参数
+     */
+    @GetMapping("/of/category")
+    public ResponseEntity<List<SpecGroupDTO>> querySpecGroupAndParamsByCategoryId(@RequestParam("id") Long categoryId){
+        List<SpecGroupDTO> specGroupDTOList = specService.querySpecGroupAndParamsByCategoryId(categoryId);
+        return ResponseEntity.ok(specGroupDTOList);
+    }
 }
