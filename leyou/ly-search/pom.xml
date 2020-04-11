@@ -46,6 +46,11 @@
             <artifactId>ly-item-client</artifactId>
             <version>${leyou.last.version}</version>
         </dependency>
+        <!--amqp依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
     </dependencies>
 
 

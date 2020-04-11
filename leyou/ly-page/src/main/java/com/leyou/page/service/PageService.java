@@ -102,5 +102,20 @@ public class PageService {
     }
 
 
-
+    /**
+     * 删除静态页
+     * @param spuId
+     */
+    public void deleteItemHtml(Long spuId) {
+        // 删除的目标文件
+        File file = new File(itemDir, spuId + ".html");
+        // 删除文件
+        if(file.exists()){
+            boolean delete = file.delete();
+            if(!delete){
+                log.info("【静态页微服务】删除静态页，删除的商品id = {}", spuId);
+                throw new LyException(ExceptionEnum.DELETE_OPERATION_FAIL);
+            }
+        }
+    }
 }

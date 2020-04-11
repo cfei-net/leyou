@@ -53,6 +53,11 @@
             <version>${leyou.last.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!--amqp的依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

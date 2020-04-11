@@ -9,6 +9,7 @@ import com.leyou.common.vo.PageResult;
 import com.leyou.item.client.ItemClient;
 import com.leyou.item.dto.*;
 import com.leyou.search.bo.Goods;
+import com.leyou.search.dao.GoodsRepository;
 import com.leyou.search.dto.GoodsDTO;
 import com.leyou.search.dto.SearchRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,9 @@ public class SearchService {
 
     @Autowired
     private ElasticsearchTemplate elasticsearchTemplate;
+
+    @Autowired
+    private GoodsRepository goodsRepository; // 对单个数据的操作比较方便
 
     /**
      * 创建Goods对象
@@ -381,5 +385,26 @@ public class SearchService {
             }
         }
         return boolQueryBuilder;
+    }
+
+    /**
+     * 插入索引对象
+     * @param spuId
+     */
+    public void saveGoods(Long spuId) {
+        // 根据id查询spu
+        SpuDTO spuDTO = itemClient.querySpuById(spuId);
+        // 创建索引对象
+        Goods goods = buildGoods(spuDTO);
+        // 保存到ES中
+        goodsRepository.save(goods);
+    }
+
+    /**
+     * 删除索引对象
+     * @param spuId
+     */
+    public void deleteGoods(Long spuId) {
+        goodsRepository.deleteById(spuId);
     }
 }

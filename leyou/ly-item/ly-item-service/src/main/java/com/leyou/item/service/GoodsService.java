@@ -2,6 +2,7 @@ package com.leyou.item.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.leyou.common.constants.MQConstants;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.BeanHelper;
@@ -16,6 +17,7 @@ import com.leyou.item.mapper.SpuDetailMapper;
 import com.leyou.item.mapper.SpuMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.leyou.common.constants.MQConstants.Exchange.ITEM_EXCHANGE_NAME;
+import static com.leyou.common.constants.MQConstants.RoutingKey.*;
 
 @Slf4j
 @Service
@@ -45,6 +50,9 @@ public class GoodsService {
 
     @Autowired
     private SkuMapper skuMapper;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate; // 发消息
 
     /**
      * 分页查询商品列表
@@ -173,6 +181,13 @@ public class GoodsService {
         if(count < 1 ){
             throw new LyException(ExceptionEnum.UPDATE_OPERATION_FAIL);
         }
+
+        // 3、上下架的时候给RabbitMQ发一条消息：去做商品的静态页和es索引数据的更新
+        amqpTemplate.convertAndSend(
+                ITEM_EXCHANGE_NAME,
+                (saleable ? ITEM_UP_KEY : ITEM_DOWN_KEY),
+                spuId
+                );
     }
 
     /**

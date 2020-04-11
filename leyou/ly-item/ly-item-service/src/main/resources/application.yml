@@ -8,6 +8,19 @@ spring:
     url: jdbc:mysql://192.168.13.111:3306/leyou?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: passw0rd
+  rabbitmq:
+    host: 192.168.13.111
+    virtual-host: /leyou
+    username: leyou
+    password: leyou
+    template:
+      retry:
+        enabled: true
+        initial-interval: 10000  #第一次重试的间隔时间
+        max-attempts: 3 #最多重试的次数
+        max-interval: 80000 # 最大的重试的时间
+        multiplier: 2 # 下一次重试间隔时间的倍数
+    publisher-confirms: true   # RabbitMQ服务接收到消息之后 给生产者确认消息，如果没有响应，才会重试
 mybatis:
     type-aliases-package: com.leyou.item.entity
     configuration:

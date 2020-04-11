@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.Serializable;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class TestRabbitMqSendMsg {
+public class TestRabbitMqSendMsg  implements Serializable {
     @Autowired
     //private RabbitTemplate rabbitTemplate; // 早期
     private AmqpTemplate amqpTemplate; // 推荐
