@@ -26,4 +26,13 @@ public class RegexUtils {
         }
         return str.matches(regex);
     }
+
+    /**
+     * 是否符合验证码
+     * @param code  验证码
+     * @return      true:符合，false：不符合
+     */
+    public static boolean isVerifyCode(String code) {
+        return matches(code, RegexPatterns.SMS_REGEX);
+    }
 }

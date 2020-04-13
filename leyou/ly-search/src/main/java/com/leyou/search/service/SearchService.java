@@ -379,7 +379,7 @@ public class SearchService {
                 } else if ("品牌".equals(key)) {
                     fieldName = "brandId";
                 } else {
-                    fieldName = "specs." + key;
+                    fieldName = "specs." + key+".keyword";
                 }
                 boolQueryBuilder.filter(QueryBuilders.termsQuery(fieldName, value));
             }
