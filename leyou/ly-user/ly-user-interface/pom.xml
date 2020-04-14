@@ -10,6 +10,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ly-user-interface</artifactId>
+    <dependencies>
+        <!--feign的核心包，注意不是启动依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+        </dependency>
+        <!--userDTO-->
+        <dependency>
+            <groupId>com.leyou</groupId>
+            <artifactId>ly-user-dto</artifactId>
+            <version>${leyou.last.version}</version>
+        </dependency>
+    </dependencies>
 
 
 </project>
