@@ -14,8 +14,8 @@ import java.security.PublicKey;
  * 公钥和私钥： 不能每次调用的时候生成，如果每次调用生成，性能很差
  *              我们应该让授权中心启动的时候，就马上加载公钥和私钥，放入内存中
  */
-//@Data
-//@Slf4j
+@Data
+@Slf4j
 @ConfigurationProperties("ly.jwt")
 public class JwtProperties implements InitializingBean {
     private String pubKeyPath;
@@ -30,92 +30,12 @@ public class JwtProperties implements InitializingBean {
 
     private AppTokenProperties app = new AppTokenProperties();
 
-    public String getPubKeyPath() {
-        return pubKeyPath;
-    }
-
-    public void setPubKeyPath(String pubKeyPath) {
-        this.pubKeyPath = pubKeyPath;
-    }
-
-    public String getPriKeyPath() {
-        return priKeyPath;
-    }
-
-    public void setPriKeyPath(String priKeyPath) {
-        this.priKeyPath = priKeyPath;
-    }
-
-    public PublicKey getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public PrivateKey getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public UserTokenProperties getUser() {
-        return user;
-    }
-
-    public void setUser(UserTokenProperties user) {
-        this.user = user;
-    }
-
-    public AppTokenProperties getApp() {
-        return app;
-    }
-
-    public void setApp(AppTokenProperties app) {
-        this.app = app;
-    }
-
     @Data
     public class AppTokenProperties{
         private int expire;
         private Long id;
         private String name;
         private String headerName;
-
-        public String getHeaderName() {
-            return headerName;
-        }
-
-        public void setHeaderName(String headerName) {
-            this.headerName = headerName;
-        }
-
-        public int getExpire() {
-            return expire;
-        }
-
-        public void setExpire(int expire) {
-            this.expire = expire;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
     }
 
     @Data
@@ -137,37 +57,6 @@ public class JwtProperties implements InitializingBean {
          */
         private int refreshTime;
 
-        public int getExpire() {
-            return expire;
-        }
-
-        public void setExpire(int expire) {
-            this.expire = expire;
-        }
-
-        public String getCookieName() {
-            return cookieName;
-        }
-
-        public void setCookieName(String cookieName) {
-            this.cookieName = cookieName;
-        }
-
-        public String getCookieDomain() {
-            return cookieDomain;
-        }
-
-        public void setCookieDomain(String cookieDomain) {
-            this.cookieDomain = cookieDomain;
-        }
-
-        public int getRefreshTime() {
-            return refreshTime;
-        }
-
-        public void setRefreshTime(int refreshTime) {
-            this.refreshTime = refreshTime;
-        }
     }
     /**
      * 我们必须要等到当前对象实例化之后，才能获取公钥和私钥的路径地址
@@ -182,11 +71,11 @@ public class JwtProperties implements InitializingBean {
         try {
             publicKey = RsaUtils.getPublicKey(pubKeyPath);
             privateKey = RsaUtils.getPrivateKey(priKeyPath);
-            //log.info("【授权中心】加载公钥和私钥成功");
-            System.out.println("【授权中心】加载公钥和私钥成功");
+            log.info("【授权中心】加载公钥和私钥成功");
+            //System.out.println("【授权中心】加载公钥和私钥成功");
         } catch (Exception e) {
-            //log.error("【授权中心】加载公钥和私钥失败,原因：{}", e.getMessage());
-            System.err.println("【授权中心】加载公钥和私钥失败,原因："+e.getMessage());
+            log.error("【授权中心】加载公钥和私钥失败,原因：{}", e.getMessage());
+            //System.err.println("【授权中心】加载公钥和私钥失败,原因："+e.getMessage());
             throw new RuntimeException("公钥和私钥加载失败",e);
         }
     }

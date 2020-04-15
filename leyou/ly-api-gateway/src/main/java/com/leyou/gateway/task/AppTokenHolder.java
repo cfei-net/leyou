@@ -28,11 +28,11 @@ public class AppTokenHolder {
     private JwtProperties prop;
 
     // 微服务申请好的token就保存在这里
-    //@Getter
+    @Getter
     private String token;
-    public String getToken() {
+    /*public String getToken() {
         return token;
-    }
+    }*/
 
     /**
      * 我们固定每24小时就去申请一次新的token，我们原来申请的token他的有效期是25小时。

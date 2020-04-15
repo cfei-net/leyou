@@ -18,7 +18,7 @@ import java.util.List;
  *      2）类上必须有一个 @Component注解
  *      3）编写一个定时任务的方法，方法上必须有这个注解：@Scheduled
  */
-//@Slf4j
+@Slf4j
 @Component
 public class AppTokenHolder {
 
@@ -32,34 +32,31 @@ public class AppTokenHolder {
     private ApplicationInfoMapper infoMapper;
 
     // 微服务申请好的token就保存在这里
-    // @Getter
+    @Getter
     private String token;
 
-    public String getToken() {
-        return token;
-    }
 
     /**
      * 我们固定每24小时就去申请一次新的token，我们原来申请的token他的有效期是25小时。
      */
-    @Scheduled(fixedDelay = 86400000L)
+    @Scheduled(fixedDelay = APP_TOKEN_REFRESH_TIME)
     public void loadAppToken() throws InterruptedException {
         while (true){
             try {
-                //log.info("【授权中心】自己给自己申请token开始");
+                log.info("【授权中心】自己给自己申请token开始");
                 // 如果密码正确，我们去查询当前微服务有访问那些服务的权限： target_id
                 List<Long> targetIdList = infoMapper.queryTargetIdListByServiceId(prop.getApp().getId());
                 // 封装载荷对象
                 AppInfo appInfo = new AppInfo(prop.getApp().getId(), prop.getApp().getName(), targetIdList);
                 // 生成token： 25小时之后失效
                 token = JwtUtils.generateTokenExpireInMinutes(appInfo, prop.getPrivateKey(), prop.getApp().getExpire());
-                System.out.println("【授权中心】自己给自己申请token成功");
-                //log.info("【授权中心】自己给自己申请token成功");
+                //System.out.println("【授权中心】自己给自己申请token成功");
+                log.info("【授权中心】自己给自己申请token成功");
                 // 如果申请成功跳出循环
                 break;
             } catch (Exception e) {
-                //log.error("【授权中心】自己给自己申请token失败：{}", e.getMessage());
-                System.err.println("【授权中心】自己给自己申请token失败："+e.getMessage());
+                log.error("【授权中心】自己给自己申请token失败：{}", e.getMessage());
+                //System.err.println("【授权中心】自己给自己申请token失败："+e.getMessage());
             }
             Thread.sleep(REFRESH_TOKEN_SLEEP_TIME);
         }

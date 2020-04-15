@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-//@Slf4j
+@Slf4j
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
 
@@ -40,10 +40,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        //log.info("【乐优网关】过滤器执行了....");
+        log.info("【乐优网关】过滤器执行了....");
         // 0、先判断当前url有没有在白名单中，如果白名单存在这个url，不用去校验了，直接放行
         if(isAllowPath(exchange.getRequest())){
-            //log.info("【乐优网关】白名单放行：{}", exchange.getRequest().getURI().getPath());
+            log.info("【乐优网关】白名单放行：{}", exchange.getRequest().getURI().getPath());
             return chain.filter(exchange);
         }
 
@@ -53,25 +53,25 @@ public class AuthFilter implements GlobalFilter, Ordered {
             // 2、校验token
             if (cookie != null) {
                 // 3、取出token的用户的角色
-                //log.info("获取token：key={},value={}", cookie.getName(), cookie.getValue());
+                log.info("获取token：key={},value={}", cookie.getName(), cookie.getValue());
                 Payload<UserInfo> payload = JwtUtils.getInfoFromToken(cookie.getValue(), prop.getPublicKey(), UserInfo.class);
                 // 3.1 获取当前用户
                 UserInfo userInfo = payload.getUserInfo();
-                //log.info("【乐优网关】用户对象： {}， 他的角色：{}",userInfo, userInfo.getRole());
+                log.info("【乐优网关】用户对象： {}， 他的角色：{}",userInfo, userInfo.getRole());
                 // 4、校验用户是否有访问当前URL的权限
                 ServerHttpRequest request = exchange.getRequest();
                 // TODO： 待完善的，判断当前用户是否有访问当前URL的权限
                 // 4.1 获取当前访问的URL
                 //log.info("获取当前访问路径：{}", request.getURI().getPath());
                 //log.info("获取当前访问路径的方法类型：{}", request.getMethodValue());
-                //log.info("【乐优网关】当前用户：{}，访问了：{}， 方法类型：{}",userInfo, request.getURI().getPath(),request.getMethodValue());
+                log.info("【乐优网关】当前用户：{}，访问了：{}， 方法类型：{}",userInfo, request.getURI().getPath(),request.getMethodValue());
             } else {
                 // 如果cookie为空不给访问
                 throw new LyException(ExceptionEnum.UNAUTHORIZED);
             }
         }catch (Exception e){
             // 5、如果没有权限，阻止继续访问
-            //log.error("【乐优网关】校验token失败：{}",e.getMessage(),e);
+            log.error("【乐优网关】校验token失败：{}",e.getMessage(),e);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);// 状态码
             return exchange.getResponse().setComplete();// 阻止往下执行
         }
