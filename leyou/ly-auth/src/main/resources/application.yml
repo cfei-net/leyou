@@ -3,6 +3,20 @@ server:
 spring:
   application:
     name: auth-service
+  redis:
+    host: 192.168.13.111
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.13.111:3306/leyou?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: passw0rd
+mybatis:
+  type-aliases-package: com.leyou.auth.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: mapper/*.xml
+mapper:
+  wrap-keyword: "`{0}`"
 eureka:
   client:
     service-url:
@@ -22,7 +36,18 @@ ly:
     pubKeyPath: D:/leyou-code/326127/rsa/id_rsa.pub # 公钥地址
     priKeyPath: D:/leyou-code/326127/rsa/id_rsa # 私钥地址
     user:
-      expire: 30 #过期时间设置
+      expire: 30 #用户登录过期时间设置
       cookieName: LY_TOKEN # cookie名称
       cookieDomain: leyou.com # cookie的域
+      refreshTime: 10 #刷新时间
+    app:
+      expire: 1500 # 微服务过期时间设置
+      id: 10 # auth服务的id
+      name: auth-service # 服务名称
+      headerName: privilege_token
+  encoder:
+    crypt:
+      secret: ${random.uuid} # 随机的密钥，使用uuid
+      strength: 10 # 加密强度4~31，决定了密码和盐加密时的运算次数，超过10以后加密耗时会显著增加
+
 

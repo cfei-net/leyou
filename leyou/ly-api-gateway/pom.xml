@@ -26,6 +26,17 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
         </dependency>
+        <!--引入common包：需要进行JWT的验证-->
+        <dependency>
+            <groupId>com.leyou</groupId>
+            <artifactId>ly-common</artifactId>
+            <version>${leyou.last.version}</version>
+        </dependency>
+        <!--feign依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

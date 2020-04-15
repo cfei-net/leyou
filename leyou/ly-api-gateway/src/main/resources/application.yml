@@ -76,3 +76,22 @@ ribbon:
   MaxAutoRetries: 0  # 当前服务重试次数
   MaxAutoRetriesNextServer: 1 # 切换服务重试次数
   OkToRetryOnAllOperations: false # 是否对所有的请求方式都重试，只对get请求重试
+
+
+ly:
+  jwt:
+    pubKeyPath: D:/leyou-code/326127/rsa/id_rsa.pub # 公钥地址
+    user:
+      cookieName: LY_TOKEN # cookie名称
+    app:
+      id: 7
+      secret: api-gateway # $2a$10$iW4/EHiMFSew/5GmEPyoi.B40Q5gMCFGoTYykyn0ZAe5XoFzNy7O.
+      headerName: privilege_token
+  filter:
+    allowPaths:   #过滤器中的白名单设置
+      - /api/auth/login
+      - /api/search
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
+      #- /api/item  # 我们现在把这里注释掉，演示黑客绕开网关

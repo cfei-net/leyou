@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,9 @@ public class UserController {
     }
 
 
+    @Autowired
+    private HttpServletRequest request;
+
     /**
      * 根据用户名和密码查询用户信息
      * @param username      用户名
@@ -90,6 +94,7 @@ public class UserController {
             @RequestParam("username") String username,
             @RequestParam("password") String password
     ){
+        System.out.println("获取feign调用请求头的信息："+request.getHeader("privilege_token"));
         // 查询用户
         UserDTO userDTO = userService.queryUserByUsernameAndPassword(username, password);
         return ResponseEntity.ok(userDTO);
