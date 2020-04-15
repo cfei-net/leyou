@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class UserController {
     @Autowired
@@ -94,7 +96,7 @@ public class UserController {
             @RequestParam("username") String username,
             @RequestParam("password") String password
     ){
-        System.out.println("获取feign调用请求头的信息："+request.getHeader("privilege_token"));
+        log.info("【用户微服务】获取请求头信息，privilege_token = {}", request.getHeader("privilege_token"));
         // 查询用户
         UserDTO userDTO = userService.queryUserByUsernameAndPassword(username, password);
         return ResponseEntity.ok(userDTO);

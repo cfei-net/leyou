@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppTokenHolder {
 
-    private final static Long APP_TOKEN_REFRESH_TIME = 86400000L; // 每隔24小时去申请一次token
-    private final static Long REFRESH_TOKEN_SLEEP_TIME = 10000L; // 出现了异常等10秒再去申请
+    private final static long APP_TOKEN_REFRESH_TIME = 86400000L; // 每隔24小时去申请一次token
+    private final static long REFRESH_TOKEN_SLEEP_TIME = 10000L; // 出现了异常等10秒再去申请
 
     @Autowired
     private AuthClient authClient;
@@ -30,14 +30,11 @@ public class AppTokenHolder {
     // 微服务申请好的token就保存在这里
     @Getter
     private String token;
-    /*public String getToken() {
-        return token;
-    }*/
 
     /**
      * 我们固定每24小时就去申请一次新的token，我们原来申请的token他的有效期是25小时。
      */
-    @Scheduled(fixedDelay = 86400000L)
+    @Scheduled(fixedDelay = APP_TOKEN_REFRESH_TIME)
     public void loadAppToken() throws InterruptedException {
         while (true){
             try {

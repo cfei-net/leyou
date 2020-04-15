@@ -4,6 +4,7 @@ import com.leyou.common.auth.entity.AppInfo;
 import com.leyou.common.auth.entity.Payload;
 import com.leyou.common.auth.utils.JwtUtils;
 import com.leyou.user.config.JwtProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@Slf4j
 @Component
 public class PrivilegeInterceptor implements HandlerInterceptor {
 
@@ -36,8 +38,7 @@ public class PrivilegeInterceptor implements HandlerInterceptor {
             // 成功：可以访问我们当前服务
             return true;
         } catch (Exception e) {
-            System.out.println("【用户微服务-鉴权拦截器】拒绝访问：出现异常："+e.getMessage());
-            e.printStackTrace();
+            log.error("【用户微服务-鉴权拦截器】拒绝访问：出现异常：{}", e.getMessage());
             // 2.4 如果没有在里面返回false，不能继续访问
             return false;
         }

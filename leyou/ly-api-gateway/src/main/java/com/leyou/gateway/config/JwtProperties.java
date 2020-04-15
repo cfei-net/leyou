@@ -42,13 +42,9 @@ public class JwtProperties implements InitializingBean {
         try {
             publicKey = RsaUtils.getPublicKey(pubKeyPath);
             log.info("【乐优网关】加载公钥成功");
-            //System.out.println("【乐优网关】加载公钥成功");
         } catch (Exception e) {
             log.error("【乐优网关】加载公钥失败,原因：{}", e.getMessage());
-            //System.out.println("【乐优网关】加载公钥失败,原因："+e.getMessage());
             throw new RuntimeException("公钥加载失败",e);
         }
     }
-
-
 }

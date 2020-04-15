@@ -22,8 +22,8 @@ import java.util.List;
 @Component
 public class AppTokenHolder {
 
-    private final static Long APP_TOKEN_REFRESH_TIME = 86400000L; // 每隔24小时去申请一次token
-    private final static Long REFRESH_TOKEN_SLEEP_TIME = 10000L; // 出现了异常等10秒再去申请
+    private final static long APP_TOKEN_REFRESH_TIME = 86400000L; // 每隔24小时去申请一次token
+    private final static long REFRESH_TOKEN_SLEEP_TIME = 10000L; // 出现了异常等10秒再去申请
 
     @Autowired
     private JwtProperties prop;
@@ -34,8 +34,6 @@ public class AppTokenHolder {
     // 微服务申请好的token就保存在这里
     @Getter
     private String token;
-
-
     /**
      * 我们固定每24小时就去申请一次新的token，我们原来申请的token他的有效期是25小时。
      */
@@ -50,13 +48,11 @@ public class AppTokenHolder {
                 AppInfo appInfo = new AppInfo(prop.getApp().getId(), prop.getApp().getName(), targetIdList);
                 // 生成token： 25小时之后失效
                 token = JwtUtils.generateTokenExpireInMinutes(appInfo, prop.getPrivateKey(), prop.getApp().getExpire());
-                //System.out.println("【授权中心】自己给自己申请token成功");
                 log.info("【授权中心】自己给自己申请token成功");
                 // 如果申请成功跳出循环
                 break;
             } catch (Exception e) {
                 log.error("【授权中心】自己给自己申请token失败：{}", e.getMessage());
-                //System.err.println("【授权中心】自己给自己申请token失败："+e.getMessage());
             }
             Thread.sleep(REFRESH_TOKEN_SLEEP_TIME);
         }

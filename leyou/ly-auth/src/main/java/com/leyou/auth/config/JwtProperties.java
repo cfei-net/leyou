@@ -72,10 +72,8 @@ public class JwtProperties implements InitializingBean {
             publicKey = RsaUtils.getPublicKey(pubKeyPath);
             privateKey = RsaUtils.getPrivateKey(priKeyPath);
             log.info("【授权中心】加载公钥和私钥成功");
-            //System.out.println("【授权中心】加载公钥和私钥成功");
         } catch (Exception e) {
             log.error("【授权中心】加载公钥和私钥失败,原因：{}", e.getMessage());
-            //System.err.println("【授权中心】加载公钥和私钥失败,原因："+e.getMessage());
             throw new RuntimeException("公钥和私钥加载失败",e);
         }
     }
