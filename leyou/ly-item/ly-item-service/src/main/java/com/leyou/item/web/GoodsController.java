@@ -114,4 +114,15 @@ public class GoodsController {
         return ResponseEntity.ok(spuDTO);
     }
 
+    /**
+     * 根据sku的id批量查询sku ： 用在购物车价格对比等功能
+     * @param ids   sku的id集合
+     * @return      sku的DTO
+     */
+    @GetMapping("/sku/list")
+    public ResponseEntity<List<SkuDTO>> querySkuListByIds(@RequestParam("ids") List<Long> ids){
+        List<SkuDTO> skuList = goodsService.querySkuListByIds(ids);
+        return ResponseEntity.ok(skuList);
+    }
+
 }

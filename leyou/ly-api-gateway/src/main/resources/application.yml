@@ -56,6 +56,12 @@ spring:
             - Path=/api/auth/**
           filters:
             - StripPrefix=2
+        - id: cart-service    #购物车微服务
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/cart/**
+          filters:
+            - StripPrefix=2
 eureka:
   client:
     service-url:
@@ -94,4 +100,4 @@ ly:
       - /api/user/register
       - /api/user/check
       - /api/user/code
-      #- /api/item  # 我们现在把这里注释掉，演示黑客绕开网关
+      - /api/item  # 我们现在把这里注释掉，演示黑客绕开网关

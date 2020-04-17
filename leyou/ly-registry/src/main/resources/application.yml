@@ -9,3 +9,5 @@ eureka:
       defaultZone: http://localhost:10086/eureka
     fetch-registry: false  # 单实例： 不拉取
     register-with-eureka: false   # 单实例： 不注册
+  environment: test  #注册中心环境名称，默认为test，生产环境可以不改
+  #datacenter: xiaofeifei #数据中心地址，默认为空

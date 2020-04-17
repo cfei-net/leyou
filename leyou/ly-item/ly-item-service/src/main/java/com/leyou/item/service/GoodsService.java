@@ -292,4 +292,20 @@ public class GoodsService {
         // 返回
         return spuDTO;
     }
+
+    /**
+     * 根据skuid集合去查询sku
+     * @param ids
+     * @return
+     */
+    public List<SkuDTO> querySkuListByIds(List<Long> ids) {
+        /*if(ids.size()> 99){
+            throw new LyException(ExceptionEnum.INVALID_CARTS_NUM_ERROR);
+        }*/
+        List<Sku> skuList = skuMapper.selectByIdList(ids);
+        if(CollectionUtils.isEmpty(skuList)){
+            throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
+        }
+        return BeanHelper.copyWithCollection(skuList,SkuDTO.class);
+    }
 }

@@ -14,6 +14,7 @@ public enum ExceptionEnum {
     PRICE_CAN_NOT_BE_NULL(400, "价格不能为空"),
     INVALID_FILE_TYPE(400, "无效的文件类型！"),
     INVALID_PARAM_ERROR(400, "无效的请求参数！"),
+    INVALID_CARTS_NUM_ERROR(400, "购物车请求参数有误，购物车最多添加99件商品！"),
     INVALID_PHONE_NUMBER(400, "无效的手机号码"),
     INVALID_VERIFY_CODE(400, "验证码错误！"),
     INVALID_USERNAME_PASSWORD(400, "无效的用户名和密码！"),

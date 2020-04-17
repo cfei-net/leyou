@@ -1,0 +1,24 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: cart-service
+  redis:
+    host: 192.168.13.111
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:10086/eureka
+    registry-fetch-interval-seconds: 5   # 拉取注册的信息
+    instance-info-replication-interval-seconds: 5  # 实例信息替换的时间
+    initial-instance-info-replication-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+logging:
+  level:
+    root: info
+    com.leyou: debug
+
+
+

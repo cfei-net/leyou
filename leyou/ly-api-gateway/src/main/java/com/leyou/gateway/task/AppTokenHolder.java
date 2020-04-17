@@ -33,6 +33,8 @@ public class AppTokenHolder {
 
     /**
      * 我们固定每24小时就去申请一次新的token，我们原来申请的token他的有效期是25小时。
+     *
+     * 语法： 注解的属性： 只能是基本数据类型和String和注解类型 。 不能是包装类
      */
     @Scheduled(fixedDelay = APP_TOKEN_REFRESH_TIME)
     public void loadAppToken() throws InterruptedException {
