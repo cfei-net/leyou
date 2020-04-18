@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class GoodsController {
@@ -125,4 +126,14 @@ public class GoodsController {
         return ResponseEntity.ok(skuList);
     }
 
+    /**
+     * 扣库存
+     * @param cartMap  购物车map：  key：skuID    value：数量
+     * @return
+     */
+    @PutMapping("/stock/minus")
+    public ResponseEntity<Void> minusStock(@RequestBody Map<Long, Integer> cartMap){
+        goodsService.minusStock(cartMap);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

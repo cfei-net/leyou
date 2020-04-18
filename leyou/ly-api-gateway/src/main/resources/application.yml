@@ -62,6 +62,12 @@ spring:
             - Path=/api/cart/**
           filters:
             - StripPrefix=2
+        - id: order-service    #订单微服务微服务
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=1  #只去掉一个前缀
 eureka:
   client:
     service-url:

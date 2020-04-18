@@ -1,5 +1,6 @@
 package com.leyou.user.client;
 
+import com.leyou.user.dto.AddressDTO;
 import com.leyou.user.dto.UserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -20,4 +21,14 @@ public interface UserClient {
             @RequestParam("username") String username,
             @RequestParam("password") String password
     );
+
+    /**
+     * 跟用户id和地址id查询地址信息
+     * @param userId    用户ID
+     * @param id        地址的id
+     * @return          返回地址DTO
+     */
+    @GetMapping("/address")
+    public AddressDTO queryAddressById(@RequestParam("userId") Long userId,
+                                                       @RequestParam("id") Long id);
 }

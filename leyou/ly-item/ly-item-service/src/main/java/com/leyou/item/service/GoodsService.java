@@ -27,6 +27,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.leyou.common.constants.MQConstants.Exchange.ITEM_EXCHANGE_NAME;
@@ -307,5 +308,41 @@ public class GoodsService {
             throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
         }
         return BeanHelper.copyWithCollection(skuList,SkuDTO.class);
+    }
+
+    /**
+     * 减库存
+     * @param cartMap
+    /**
+     * 有可能出现超卖问题：
+     *      库存 1 件； 多线程并发减库存，
+     *      三个线程：大家都获取库存是 1   ， 这个三个线程都能成功，但是我们把一个商品买给三个人
+            Sku sku = skuMapper.selectByPrimaryKey(skuId);
+            sku.setStock(sku.getStock() - num);
+            int count = skuMapper.updateByPrimaryKey(sku);
+     *
+     * synchronized:  只能控制多线程间的并发问题； 进程间控制不了
+     * 采用分布式锁：  性能低了
+     *                 CAS： compare and set  ： 乐观锁
+     *                 update sku set stock = stock  - 1 , version = version + 1  where skuid = ? and version=1
+     *                 update sku set stock = stock  - 1 , version = version + 1  where skuid = ? and version=1
+     *                 update sku set stock = stock  - 1 , version = version + 1  where skuid = ? and version=1
+     *  超卖问题的终极解决方案： 无符号
+     *              无符号，就是字段不能是负数，超卖问题其实就是库存为负数
+     *              unsigned   属性就是将数字类型无符号化，与C、C++这些程序语言中的unsigned含义相同
+     *              范围：unsigned   int        0～4294967295
+     *              范围：int                            -2147483648～2147483647
+     */
+    @Transactional
+    public void minusStock(Map<Long, Integer> cartMap) {
+        for (Map.Entry<Long, Integer> cart : cartMap.entrySet()) {
+            Long skuId = cart.getKey();// sku的id
+            Integer num = cart.getValue();// 购买数量
+            // 减库存操作
+            int count = skuMapper.minusStock(skuId, num);
+            if(count!=1){
+                throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH_ERROR);
+            }
+        }
     }
 }

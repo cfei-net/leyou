@@ -4,11 +4,10 @@ import com.leyou.common.vo.PageResult;
 import com.leyou.item.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(value = "item-service")
 public interface ItemClient {
@@ -101,4 +100,21 @@ public interface ItemClient {
      */
     @GetMapping("/spec/of/category")
     public List<SpecGroupDTO> querySpecGroupAndParamsByCategoryId(@RequestParam("id") Long categoryId);
-    }
+
+
+    /**
+     * 根据sku的id批量查询sku ： 用在购物车价格对比等功能
+     * @param ids   sku的id集合
+     * @return      sku的DTO
+     */
+    @GetMapping("/sku/list")
+    public List<SkuDTO> querySkuListByIds(@RequestParam("ids") List<Long> ids);
+
+    /**
+     * 扣库存
+     * @param cartMap  购物车map：  key：skuID    value：数量
+     * @return
+     */
+    @PutMapping("/stock/minus")
+    public void minusStock(@RequestBody Map<Long, Integer> cartMap);
+}
