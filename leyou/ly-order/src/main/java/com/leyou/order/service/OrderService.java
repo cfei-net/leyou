@@ -21,6 +21,7 @@ import com.leyou.order.vo.OrderLogisticsVO;
 import com.leyou.order.vo.OrderVO;
 import com.leyou.user.client.UserClient;
 import com.leyou.user.dto.AddressDTO;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class OrderService {
      * @param orderDTO      订单DTO对象
      * @return              订单编号
      */
+    //@GlobalTransactional  //分布式事务控制注解
     @Transactional
     public Long createOrder(OrderDTO orderDTO) {
         Order order = new Order();
@@ -116,7 +118,18 @@ public class OrderService {
             throw new LyException(ExceptionEnum.INSERT_OPERATION_FAIL);
         }
         // 5、减去库存
+        /**
+         * 为什么把减库存：远程调用减库存放到最后呢？
+         *      1、feign的远程调用，如果出现了异常会把异常返回到当前的方法中
+         *      2、因为当前方法有事务，在前面有三次的数据库的操作，如果最后一次报错，整个方法都会回滚，避免了分布式事务问题【分布式事务性能不能好】
+         */
         itemClient.minusStock(cartMap);
+
+        /**
+         *  如果feign正常执行了，但是执行了feign接口之后，出异常，这个时候，这个方法会回滚，但是feign接口回滚不了
+         */
+        //int i = 1/0;  //模拟异常
+
         // 6、返回订单编号
         return orderId;
     }

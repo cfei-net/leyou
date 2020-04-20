@@ -57,6 +57,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        <!--引入我们自己写的seata的启动类-->
+        <!--<dependency>
+            <groupId>com.leyou</groupId>
+            <artifactId>ly-transaction-seata</artifactId>
+            <version>${leyou.last.version}</version>
+        </dependency>-->
     </dependencies>
     <build>
         <plugins>

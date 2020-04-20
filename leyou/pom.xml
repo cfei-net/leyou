@@ -20,6 +20,8 @@
         <module>ly-auth</module>
         <module>ly-cart</module>
         <module>ly-order</module>
+        <module>ly-transaction-seata</module>
+        <module>ly-sharding-sphere</module>
     </modules>
     <packaging>pom</packaging>
 

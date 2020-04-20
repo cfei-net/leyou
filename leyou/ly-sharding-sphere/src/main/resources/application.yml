@@ -1,0 +1,49 @@
+#配置数据源
+sharding:
+  jdbc:
+    datasource:
+      #数据库名，名称不能包含下划线
+      names: sharding0,sharding1
+      sharding0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.13.111:3306/sharding0?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: passw0rd
+      sharding1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.13.111:3306/sharding1?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: passw0rd
+    config:
+      props:
+        sql:
+          show: true  # 打印sharding-jdbc真正执行的sql语句
+      sharding:
+        #分库策略；行表达式分片策略
+        default-database-strategy:
+          inline:
+            #分库字段；
+            sharding-column: order_id  # 根据谁的值命中数据库
+            # 策略；确定数据进入哪个库
+            algorithm-expression: sharding$->{order_id%2}   #拼接数据库的名称，根据订单id对2取模，
+        tables:
+          # 分表策略
+          tb_order:   #表的名称，写在实体类中映射的表名
+            #数据库表节点
+            actual-data-nodes: sharding$->{0..1}.tb_order_$->{1..3}  #数据落入那个数据库的那张表
+            # 分表策略
+            table-strategy:
+              inline:
+                # 分表字段
+                sharding-column: order_id
+                # 策略；确定数据进入哪张表
+                algorithm-expression: tb_order_$->{order_id%3 + 1}   #取模之后得到： 0 、1 、2   ： 表从1开始
+            # 主键
+            key-generator-column-name: order_id
+            key-generator-column-class: SNOWFLAKE   #使用雪花id作为主键
+
+spring:
+  main:
+    allow-bean-definition-overriding: true

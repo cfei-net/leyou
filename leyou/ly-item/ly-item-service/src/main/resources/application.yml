@@ -21,6 +21,8 @@ spring:
         max-interval: 80000 # 最大的重试的时间
         multiplier: 2 # 下一次重试间隔时间的倍数
     publisher-confirms: true   # RabbitMQ服务接收到消息之后 给生产者确认消息，如果没有响应，才会重试
+  main:
+    allow-bean-definition-overriding: true  # 如果spring容器中出现了相同的bean，我们可以替换
 mybatis:
     type-aliases-package: com.leyou.item.entity
     configuration:
